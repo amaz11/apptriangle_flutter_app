@@ -7,5 +7,6 @@ class AppConstant {
   static String attendence = "/attendence";
   static String leave = "/leaves";
   static String file = "/file/image";
+  static String profile = "/users/profile";
   final client = http.Client();
 }

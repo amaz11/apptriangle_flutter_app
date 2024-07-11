@@ -1,5 +1,7 @@
 import 'package:attenapp/cors/theme/textStyle.dart';
+import 'package:attenapp/cors/utils/appAssest.dart';
 import 'package:attenapp/cors/utils/leaveApi.dart';
+import 'package:attenapp/cors/widget/ImageWidget.dart';
 import 'package:attenapp/cors/widget/Sidebar.dart';
 import 'package:attenapp/cors/widget/SizedBoxHeight10.dart';
 import 'package:flutter/material.dart';
@@ -126,6 +128,25 @@ class _LeaveteamleadState extends State<Leaveteamlead> {
       return Container();
     }
 
+    Widget imageFile(image) {
+      if (image.length > 0) {
+        return ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: GestureDetector(
+              child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: 100,
+                  child: Image.asset(imageIcon)),
+              onTap: () async {
+                await showDialog(
+                    context: context,
+                    builder: (_) => ImageDialog(image: image));
+              },
+            ));
+      }
+      return Container();
+    }
+
     Widget rejectReason(name, reason, status) {
       if (reason == null) {
         return Container();
@@ -237,6 +258,7 @@ class _LeaveteamleadState extends State<Leaveteamlead> {
                 Center(
                     child: Text(leave["reason"], style: TextStyles.regular12)),
                 const SizedBoxHeight10(),
+                Center(child: imageFile(leave["file"])),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

@@ -1,8 +1,11 @@
+import 'package:attenapp/cors/theme/textStyle.dart';
+import 'package:attenapp/cors/utils/appAssest.dart';
 import 'package:attenapp/module/auth/view/Login.dart';
 import 'package:attenapp/module/home/view/Home.dart';
 import 'package:attenapp/module/leave/view/LeaveTeamLead.dart';
 import 'package:attenapp/module/leave/view/MyLeave.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -70,11 +73,19 @@ class _SidebarState extends State<Sidebar> {
                   Expanded(
                     child: ListView(
                       children: [
-                        const DrawerHeader(
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
+                        DrawerHeader(
+                          decoration: const BoxDecoration(
+                              color: Colors.blue,
+                              image: DecorationImage(
+                                  image: AssetImage(drawerImg),
+                                  fit: BoxFit.cover,
+                                  colorFilter: ColorFilter.mode(
+                                      Colors.black54, BlendMode.darken))),
+                          child: Text(
+                            'TrackTide',
+                            style: TextStyles.title22
+                                .copyWith(color: Colors.white),
                           ),
-                          child: Text('Drawer Header'),
                         ),
                         ListTile(
                           leading: const Icon(Icons.home_outlined),
