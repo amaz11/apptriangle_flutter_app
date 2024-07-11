@@ -75,4 +75,32 @@ class AttendenceService {
       AppConstant().client.close();
     }
   }
+
+  Future<dynamic> todayAttendence() async {
+    final urlParse = Uri.parse("$url/user/today/attendence");
+    try {
+      final token = await Apptoken().getjwt();
+      final response = await AppConstant().client.get(
+        urlParse,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token'
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      if (response.statusCode == 400) {
+        return jsonDecode(response.body);
+      }
+      if (response.statusCode == 404) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    } finally {
+      AppConstant().client.close();
+    }
+  }
 }

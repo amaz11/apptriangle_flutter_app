@@ -1,5 +1,6 @@
 import 'package:attenapp/cors/theme/textStyle.dart';
 import 'package:attenapp/cors/utils/attendenceApi.dart';
+import 'package:attenapp/cors/widget/SizedBoxHight20.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,31 +37,41 @@ class _AttendenceState extends State<Attendence>
 
   void initSharedPreferences() async {
     prefs = await SharedPreferences.getInstance();
-    final bool? isCheckIn = prefs.getBool("isCheckInComplete");
-    final bool? isCheckOut = prefs.getBool("isCheckOutComplete");
-    final currrent = DateTime.now();
-    final int currentHour = currrent.hour;
-    setState(() {
-      if (isCheckIn != null) {
-        if (currentHour >= 18) {
-          isCheckInComplete = true;
-        } else if (isCheckIn == true) {
-          isCheckInComplete = true;
-        } else {
-          isCheckInComplete = false;
-        }
-      }
-    });
-    if (currentHour >= 0 || currentHour < 18) {
-      prefs.setBool("isCheckOutComplete", false);
-    } else if (isCheckOut != null && isCheckOut == true) {
+    final todayAttendence = await AttendenceService().todayAttendence();
+    if (todayAttendence["data"].length > 0) {
+      final bool? isCheckIn = prefs.getBool("isCheckInComplete");
+      final bool? isCheckOut = prefs.getBool("isCheckOutComplete");
+      final currrent = DateTime.now();
+      final int currentHour = currrent.hour;
       setState(() {
-        if (currentHour >= 18) {
-          isCheckOutComplete = false;
-        } else {
-          isCheckOutComplete = true;
+        if (isCheckIn != null) {
+          if (currentHour >= 18) {
+            isCheckInComplete = true;
+          } else if (isCheckIn == true) {
+            isCheckInComplete = true;
+          } else {
+            isCheckInComplete = false;
+          }
         }
       });
+      if (currentHour >= 0 || currentHour < 18) {
+        prefs.setBool("isCheckOutComplete", false);
+      } else if (isCheckOut != null && isCheckOut == true) {
+        setState(() {
+          if (currentHour >= 18) {
+            isCheckOutComplete = false;
+          } else {
+            isCheckOutComplete = true;
+          }
+        });
+      }
+    } else {
+      setState(() {
+        isCheckInComplete = false;
+        isCheckOutComplete = false;
+      });
+      prefs.setBool("isCheckInComplete", false);
+      prefs.setBool("isCheckOutComplete", false);
     }
   }
 
@@ -279,9 +290,46 @@ class _AttendenceState extends State<Attendence>
         ),
       );
     }
-    return Text(
-      "Your Apply is Complete",
-      style: TextStyles.title16,
+    return Column(
+      children: [
+        Text(
+          "Your Apply is Complete",
+          style: TextStyles.title16,
+        ),
+        const SizedBoxHeight20(),
+        SizedBox(
+          width: 180,
+          child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(40),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                backgroundColor: const Color(0xff2a225d),
+              ),
+              onPressed: () {
+                initSharedPreferences();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.refresh,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    "Refresh Screen",
+                    style: TextStyles.regular12.copyWith(color: Colors.white),
+                  ),
+                ],
+              )),
+        ),
+      ],
     );
   }
 }
