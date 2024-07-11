@@ -1,3 +1,4 @@
+import 'package:attenapp/cors/theme/textStyle.dart';
 import 'package:attenapp/cors/utils/authApi.dart';
 import 'package:attenapp/module/home/view/Home.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +76,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      backgroundColor: Colors.white,
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -151,11 +152,11 @@ class _LoginState extends State<Login> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
+                        minimumSize: const Size.fromHeight(50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        backgroundColor: const Color(0xff2a225d)),
                     onPressed: () {
                       if (_formKey.currentState?.validate() ?? false) {
                         submitSignIn(
@@ -163,7 +164,11 @@ class _LoginState extends State<Login> {
                             password: _controllerPassword.text.toString());
                       }
                     },
-                    child: const Text("Login"),
+                    child: Text(
+                      "Login",
+                      style: TextStyles.regular14.copyWith(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),

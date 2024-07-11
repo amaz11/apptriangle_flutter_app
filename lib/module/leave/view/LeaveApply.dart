@@ -1,9 +1,12 @@
-import 'dart:async';
+import 'dart:io';
+
 import 'package:attenapp/cors/theme/textStyle.dart';
 import 'package:attenapp/cors/utils/leaveApi.dart';
 import 'package:attenapp/cors/widget/SizedBoxHeight10.dart';
 import 'package:attenapp/cors/widget/SizedBoxHight20.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 const List<String> list = <String>['CASUAL', 'SICK', 'ANNUAL'];
 
@@ -21,6 +24,9 @@ class _LeaveState extends State<Leave> {
   final TextEditingController _controllerDayStart = TextEditingController();
   final TextEditingController _controllerDayEnd = TextEditingController();
   String dropdownValue = list.first;
+  XFile? pickedFile;
+  late String file = "";
+  bool fileUploaded = false;
 
   int leaveDays = 0;
   List<DateTime> weekendsAndHolidays = [];
@@ -88,10 +94,10 @@ class _LeaveState extends State<Leave> {
     });
   }
 
-  Future _leaveApply({type, reason, dayStart, dayEnd}) async {
+  Future _leaveApply({type, reason, dayStart, dayEnd, file}) async {
     try {
       final res =
-          await LeaveService().leaveApply(type, reason, dayStart, dayEnd);
+          await LeaveService().leaveApply(type, reason, dayStart, dayEnd, file);
 
       if (res == null) {
         throw Exception('Response is null');
@@ -219,7 +225,70 @@ class _LeaveState extends State<Leave> {
             ),
             const SizedBoxHeight20(),
             customeDynamicLeaveCountWidget(),
-            const SizedBox(height: 50),
+            Visibility(
+                visible: pickedFile != null,
+                child: pickedFile != null
+                    ? Image.file(
+                        File(pickedFile!.path),
+                        height: 300,
+                        width: 300,
+                      )
+                    : Container()),
+            const SizedBoxHeight20(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(1),
+                    )),
+                    onPressed: () {
+                      checkPermission('camera');
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.camera_alt_outlined,
+                          size: 18,
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          'Take Picture',
+                          style: TextStyles.regular12
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    )),
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(1),
+                    )),
+                    onPressed: () {
+                      checkPermission('gallery');
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.image_outlined,
+                          size: 18,
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          'Gallary Picture',
+                          style: TextStyles.regular12
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    )),
+              ],
+            ),
+            const SizedBox(height: 30),
             Column(
               children: [
                 ElevatedButton(
@@ -228,18 +297,27 @@ class _LeaveState extends State<Leave> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
+                    backgroundColor: const Color(0xff2a225d),
                   ),
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
-                      _leaveApply(
-                          type: dropdownValue,
-                          reason: _controllerReason.text,
-                          dayStart: _controllerDayStart.text,
-                          dayEnd: _controllerDayEnd.text);
+                      if (fileUploaded == false) {
+                        _leaveApply(
+                            type: dropdownValue,
+                            reason: _controllerReason.text,
+                            dayStart: _controllerDayStart.text,
+                            dayEnd: _controllerDayEnd.text,
+                            file: file);
+                      }
                     }
                   },
-                  child: const Text("Apply"),
+                  child: Text(
+                    fileUploaded ? "Loading..." : "Apply",
+                    style: TextStyles.regular14.copyWith(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                 ),
+                const SizedBoxHeight20(),
               ],
             ),
           ],
@@ -256,5 +334,54 @@ class _LeaveState extends State<Leave> {
       'Total Leave Days: $leaveDays',
       style: TextStyles.regular12,
     );
+  }
+
+  checkPermission(selectPic) async {
+    Map<Permission, PermissionStatus> status = await [
+      Permission.camera,
+      Permission.storage,
+    ].request();
+    if (status[Permission.camera] != PermissionStatus.granted ||
+        status[Permission.storage] != PermissionStatus.granted) {
+      return;
+    }
+    pickedImage(selectPic);
+  }
+
+  pickedImage(selectPic) async {
+    final picker = ImagePicker();
+    if (selectPic == 'camera') {
+      pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+      final response = await LeaveService().uploadimage(pickedFile);
+      setState(() {
+        fileUploaded = true;
+      });
+      if (response != null && response['ok'] == true) {
+        setState(() {
+          file = response['imagePath'];
+          fileUploaded = false;
+        });
+      }
+
+      setState(() {
+        fileUploaded = false;
+      });
+    } else {
+      pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      final response = await LeaveService().uploadimage(pickedFile);
+      setState(() {
+        fileUploaded = true;
+      });
+      if (response != null && response['ok'] == true) {
+        setState(() {
+          file = response['imagePath'];
+          fileUploaded = false;
+        });
+      }
+      setState(() {
+        fileUploaded = false;
+      });
+    }
   }
 }

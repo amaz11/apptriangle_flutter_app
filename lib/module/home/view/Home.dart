@@ -1,6 +1,7 @@
 import 'package:attenapp/cors/widget/Sidebar.dart';
 import 'package:attenapp/module/attendence/view/Attendence.dart';
 import 'package:attenapp/module/leave/view/LeaveApply.dart';
+import 'package:attenapp/module/profile/view/Profile.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -12,15 +13,10 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static final List<Widget> _bottomNavBarOptions = <Widget>[
     const Attendence(),
     const Leave(),
-    const Text(
-      'Profile',
-      style: optionStyle,
-    ),
+    const Profile(),
   ];
 
   static const List<Widget> _appbarOption = <Widget>[
